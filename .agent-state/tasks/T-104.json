@@ -1,0 +1,43 @@
+{
+  "task_id": "T-104",
+  "title": "Visual Inspection: Multimodal UI Audit Against Design Spec",
+  "description": "Capture screenshots of the rendered dashboard at multiple breakpoints (mobile 375px, tablet 768px, desktop 1440px) and perform a multimodal visual inspection against the Frontend Craft Triad specifications. Verify dark mode contrast, typographic hierarchy, touch target sizing, layout stress-testing, and absence of AI-slop patterns.",
+  "assigned_agent": "OpenCode Nemotron 3.5 Super VL Free",
+  "provider_instance": "opencode",
+  "model": "opencode/nemotron-3.5-super-vl-free",
+  "status": "QUEUED",
+  "attempt_count": 0,
+  "max_attempts": 2,
+  "dependencies": ["T-103"],
+  "scope": {
+    "write_scope": [
+      ".agent-state/screenshots/",
+      ".agent-state/tasks/T-104-report.md"
+    ],
+    "read_only_scope": [
+      "src/types/contracts.ts",
+      "src/app/",
+      "src/components/",
+      "tailwind.config.ts",
+      "AGENTS.md",
+      "PROJECT_BRIEF.md"
+    ]
+  },
+  "acceptance_criteria": [
+    "Screenshots captured at 375px, 768px, and 1440px widths for: dashboard home, artist leaderboard, artist detail, track gainers",
+    "VERIFY: No AI-slop patterns detected (centered hero, 3-col cards, gradient blobs, generic borders)",
+    "VERIFY: Dark mode contrast ratio meets WCAG AA (4.5:1 for body text, 3:1 for large text)",
+    "VERIFY: Stream numbers and delta badges are visually prominent — leading the hierarchy",
+    "VERIFY: Touch targets are minimum 44x44px on mobile views",
+    "VERIFY: No text overflow or clipping on extreme content lengths",
+    "VERIFY: Responsive layout adapts cleanly across breakpoints without horizontal scroll",
+    "VERIFY: Amber/industrial accent colors are consistent across views",
+    "Output a detailed audit report to .agent-state/tasks/T-104-report.md with PASS/FAIL per criterion and annotated screenshots"
+  ],
+  "verification": {
+    "cmd": "test -f /home/divyansh-prajapati/Downloads/DHH-Pulse-Team/.agent-state/tasks/T-104-report.md && echo 'REPORT_EXISTS'",
+    "passed": false
+  },
+  "qa_feedback": [],
+  "escalate_to": "Pratyush"
+}

@@ -34,3 +34,8 @@ lerna-debug.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+data/*.sqlite
+data/*.sqlite-journal
+data/*.sqlite-wal
+data/*.sqlite-shm

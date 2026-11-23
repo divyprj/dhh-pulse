@@ -1,0 +1,45 @@
+{
+  "task_id": "T-102",
+  "title": "Analytics Engine: 24h Delta Calculator, Aggregator & Leaderboard Rankings",
+  "description": "Implement the analytics layer that computes daily deltas from snapshot comparisons, aggregates artist-level daily streams across catalogs, and produces ranked leaderboard data. Includes negative delta clamping, time-series data preparation for trajectory charts, and top gainer track computation.",
+  "assigned_agent": "OpenCode Beam Free",
+  "provider_instance": "opencode",
+  "model": "opencode/beam-free",
+  "status": "COMPLETED",
+  "attempt_count": 1,
+  "max_attempts": 2,
+  "dependencies": ["T-101"],
+  "scope": {
+    "write_scope": [
+      "src/lib/analytics/delta.ts",
+      "src/lib/analytics/aggregator.ts",
+      "src/lib/analytics/leaderboard.ts"
+    ],
+    "read_only_scope": [
+      "src/types/contracts.ts",
+      "src/lib/db/client.ts",
+      "src/lib/db/schema.ts",
+      "AGENTS.md",
+      "PROJECT_BRIEF.md"
+    ]
+  },
+  "acceptance_criteria": [
+    "src/lib/analytics/delta.ts exports computeTrackDeltas(date?: SnapshotDate): TrackDelta[] — compares today vs yesterday playcounts, clamps negative deltas to 0",
+    "src/lib/analytics/delta.ts exports computeArtistDeltas(date?: SnapshotDate): ArtistDelta[] — compares today vs yesterday monthly listeners and followers",
+    "src/lib/analytics/delta.ts handles missing previous-day data gracefully (new tracks/artists return 0 delta, not error)",
+    "src/lib/analytics/aggregator.ts exports aggregateArtistDailyStreams(date?: SnapshotDate): ArtistDailyAggregate[] — sums all track deltas per artist, identifies top track per artist",
+    "src/lib/analytics/aggregator.ts exports getArtistTrajectory(spotifyId, metric, startDate, endDate): ArtistTrajectory — returns time-series data points for charts",
+    "src/lib/analytics/aggregator.ts exports getArtistDetail(spotifyId): ArtistDetailView — assembles full artist detail view with recent tracks and trajectory data",
+    "src/lib/analytics/leaderboard.ts exports getLeaderboard(query: LeaderboardQuery): LeaderboardResponse — sorted, paginated artist rankings",
+    "src/lib/analytics/leaderboard.ts exports getTopGainerTracks(query: TopGainerTracksQuery): TopGainerTracksResponse — scene-wide top gaining tracks",
+    "All functions use parameterized SQL queries (no string concatenation) to prevent SQL injection",
+    "All functions import types exclusively from src/types/contracts.ts",
+    "Leaderboard supports all 5 sort keys: totalDailyStreams, monthlyListeners, listenerDelta, followers, topTrackStreams"
+  ],
+  "verification": {
+    "cmd": "cd /home/divyansh-prajapati/Downloads/DHH-Pulse-Team && npx tsc --noEmit",
+    "passed": true
+  },
+  "qa_feedback": [],
+  "escalate_to": "Pratyush"
+}

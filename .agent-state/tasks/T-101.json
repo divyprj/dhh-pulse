@@ -1,0 +1,59 @@
+{
+  "task_id": "T-101",
+  "title": "Backend Core: SQLite Database, Spotify Guest Auth & Pathfinder Scraper",
+  "description": "Implement the complete backend data pipeline: SQLite database schema with better-sqlite3, Spotify guest token acquisition, Pathfinder GraphQL artist/track data extraction, rate-limited batch orchestrator, artist registry seeding, and standalone CLI scrape entry point. Also scaffold the Next.js project with package.json, tsconfig, and config files.",
+  "assigned_agent": "Pratyush",
+  "provider_instance": "Pratyush",
+  "model": "claude-sonnet-4-6",
+  "status": "COMPLETED",
+  "attempt_count": 1,
+  "max_attempts": 2,
+  "dependencies": [],
+  "scope": {
+    "write_scope": [
+      "package.json",
+      "tsconfig.json",
+      "next.config.ts",
+      "vitest.config.ts",
+      "src/lib/db/schema.ts",
+      "src/lib/db/client.ts",
+      "src/lib/scraper/auth.ts",
+      "src/lib/scraper/artist.ts",
+      "src/lib/scraper/tracks.ts",
+      "src/lib/scraper/catalog.ts",
+      "src/lib/scraper/orchestrator.ts",
+      "src/config/artists.ts",
+      "scripts/scrape.ts",
+      ".github/workflows/daily-scrape.yml"
+    ],
+    "read_only_scope": [
+      "src/types/contracts.ts",
+      "AGENTS.md",
+      "PROJECT_BRIEF.md"
+    ]
+  },
+  "acceptance_criteria": [
+    "package.json declares dependencies: next@15, react@19, react-dom@19, better-sqlite3, recharts, tailwindcss@4, typescript@5, vitest, @types/better-sqlite3",
+    "tsconfig.json uses strict mode with paths alias '@/*' -> 'src/*'",
+    "src/lib/db/schema.ts creates all 4 tables (artists, artist_snapshots, track_snapshots, scrape_runs) with exact indexes specified in DB_SCHEMA_CONTRACT",
+    "src/lib/db/client.ts exports a singleton DB connection using better-sqlite3 with WAL mode enabled",
+    "src/lib/scraper/auth.ts acquires Spotify guest tokens via open.spotify.com/get_access_token and caches until expiry",
+    "src/lib/scraper/artist.ts extracts artist metadata + monthly listeners from Pathfinder GraphQL",
+    "src/lib/scraper/tracks.ts extracts exact track playcounts from Pathfinder GraphQL for an artist's full discography",
+    "src/lib/scraper/catalog.ts discovers all albums/singles/EPs and their tracks for an artist",
+    "src/lib/scraper/orchestrator.ts implements rate-limited sequential batch processing with randomized jitter (2-5s), retry with exponential backoff, and negative delta guards",
+    "src/config/artists.ts exports a registry of 15+ DHH artists (KR$NA, Seedhe Maut, MC Stan, DIVINE, Raftaar, Talha Anjum, Talhah Yunus, Karma, Raga, Bella, etc.) conforming to ArtistRegistryEntry contract",
+    "scripts/scrape.ts is a standalone CLI entry point: `npx tsx scripts/scrape.ts` runs a full scrape batch",
+    ".github/workflows/daily-scrape.yml runs the scraper daily at 06:00 UTC via GitHub Actions cron",
+    "All scraper functions correctly handle 429/5xx with backoff, never crash on network errors",
+    "All TypeScript imports from contracts.ts use the readonly branded types"
+  ],
+  "verification": {
+    "cmd": "cd /home/divyansh-prajapati/Downloads/DHH-Pulse-Team && npm install && npx tsc --noEmit",
+    "passed": true,
+    "verified_at": "2026-11-23T20:59:53+05:30",
+    "exit_code": 0
+  },
+  "qa_feedback": [],
+  "escalate_to": "Pratyush"
+}

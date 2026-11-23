@@ -1,0 +1,126 @@
+name: DHH Pulse — Daily Spotify Scrape
+
+on:
+  schedule:
+    # Run every day at 06:00 UTC
+    - cron: "0 6 * * *"
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      quick:
+        description: "Quick update only (skip catalog discovery)"
+        type: boolean
+        required: false
+        default: false
+      artist_id:
+        description: "Optional: Specific Spotify Artist ID to scrape"
+        type: string
+        required: false
+
+jobs:
+  scrape:
+    name: Scrape DHH Artist Data
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # 2-hour max for 20+ artists with polite delays
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Checkout
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # 2. Setup Node.js
+      # -----------------------------------------------------------------------
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      # -----------------------------------------------------------------------
+      # 3. Install dependencies
+      # -----------------------------------------------------------------------
+      - name: Install dependencies
+        run: npm ci
+
+      # -----------------------------------------------------------------------
+      # 4. Restore SQLite database from cache (preserves historical data)
+      # -----------------------------------------------------------------------
+      - name: Restore SQLite database cache
+        id: cache-db
+        uses: actions/cache@v4
+        with:
+          path: data/dhh-pulse.sqlite
+          key: dhh-sqlite-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            dhh-sqlite-${{ runner.os }}-
+
+      # -----------------------------------------------------------------------
+      # 5. Run the scraper
+      # -----------------------------------------------------------------------
+      - name: Run DHH Pulse scraper
+        run: |
+          if [ "${{ github.event.inputs.quick }}" = "true" ]; then
+            ARGS="--quick"
+          else
+            ARGS=""
+          fi
+
+          if [ -n "${{ github.event.inputs.artist_id }}" ]; then
+            ARGS="$ARGS --artist ${{ github.event.inputs.artist_id }}"
+          fi
+
+          echo "Running: npx tsx scripts/scrape.ts $ARGS"
+          npx tsx scripts/scrape.ts $ARGS
+        env:
+          NODE_ENV: production
+
+      # -----------------------------------------------------------------------
+      # 6. Upload SQLite database as artifact (30-day retention)
+      # -----------------------------------------------------------------------
+      - name: Upload SQLite database artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dhh-pulse-db-${{ github.run_id }}
+          path: data/dhh-pulse.sqlite
+          retention-days: 30
+
+      # -----------------------------------------------------------------------
+      # 7. Commit updated database back to repo (optional — if using repo storage)
+      # -----------------------------------------------------------------------
+      # NOTE: This step commits the SQLite file back to the repository.
+      # This is a valid free-tier approach for <100MB databases.
+      # Disable this step and rely on the cache + artifact if the DB grows large.
+      - name: Commit database snapshot
+        run: |
+          git config --global user.name "DHH Pulse Bot"
+          git config --global user.email "bot@dhh-pulse.local"
+
+          # Only commit if the database changed
+          if git diff --quiet data/dhh-pulse.sqlite 2>/dev/null; then
+            echo "No database changes — skipping commit."
+          else
+            git add data/dhh-pulse.sqlite
+            git commit -m "data: daily snapshot $(date -u +%Y-%m-%d) [skip ci]"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true  # Don't fail the workflow if push fails
+
+      # -----------------------------------------------------------------------
+      # 8. Summary
+      # -----------------------------------------------------------------------
+      - name: Scrape summary
+        if: always()
+        run: |
+          echo "## Scrape Run Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date**: $(date -u +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mode**: ${{ github.event.inputs.quick == 'true' && 'Quick Update' || 'Full Catalog Sync' }}" >> $GITHUB_STEP_SUMMARY
+          if [ -f data/dhh-pulse.sqlite ]; then
+            DB_SIZE=$(du -sh data/dhh-pulse.sqlite | cut -f1)
+            echo "- **Database size**: $DB_SIZE" >> $GITHUB_STEP_SUMMARY
+          fi

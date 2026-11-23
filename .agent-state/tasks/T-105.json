@@ -1,0 +1,55 @@
+{
+  "task_id": "T-105",
+  "title": "QA Audit: Security Review, Test Coverage Verification & GitHub Auto-Push",
+  "description": "Independent quality assurance gate. Audit all git diffs from T-101 through T-104 for security vulnerabilities, logic flaws, contract compliance, and test coverage. Upon APPROVED verdict, auto-commit with Conventional Commits and push to GitHub remote under divyprj.",
+  "assigned_agent": "Rudraksh",
+  "provider_instance": "Rudraksh",
+  "model": "gemini-3.8-flash-high",
+  "status": "QUEUED",
+  "attempt_count": 0,
+  "max_attempts": 2,
+  "dependencies": ["T-101", "T-102", "T-103", "T-104"],
+  "scope": {
+    "write_scope": [
+      ".agent-state/tasks/T-105-audit.md"
+    ],
+    "read_only_scope": [
+      "src/",
+      "scripts/",
+      ".github/",
+      "package.json",
+      "tsconfig.json",
+      "src/types/contracts.ts",
+      "AGENTS.md",
+      "PROJECT_BRIEF.md"
+    ]
+  },
+  "acceptance_criteria": [
+    "SCOPE AUDIT: Verify no worker modified files outside their write_scope via `git diff --name-only`",
+    "CONTRACT AUDIT: Verify contracts.ts was not modified by any worker (checksum comparison)",
+    "SECURITY: No hardcoded secrets, tokens, or credentials in source code",
+    "SECURITY: All SQL queries use parameterized statements (no string interpolation)",
+    "SECURITY: Scraper error handling does not leak internal state in API responses",
+    "LOGIC: Delta calculations correctly clamp negative track deltas to 0",
+    "LOGIC: Guest token refresh handles expiration correctly",
+    "LOGIC: Rate limiter jitter is truly randomized (not deterministic seed)",
+    "TYPES: All imports from contracts.ts match the locked interface definitions",
+    "COVERAGE: Pre-flight verification commands pass for T-101, T-102, T-103",
+    "On APPROVED: Execute `git add -A && git commit -m 'feat(core): DHH Pulse v1 — scraper, analytics, dashboard' && gh repo create dhh-pulse --private --source=. --remote=origin --push` (or push to existing remote)",
+    "Output detailed audit report to .agent-state/tasks/T-105-audit.md with APPROVED or REJECTED verdict"
+  ],
+  "verification": {
+    "cmd": "cd /home/divyansh-prajapati/Downloads/DHH-Pulse-Team && git log --oneline -1 && git remote -v",
+    "passed": false
+  },
+  "auto_push": {
+    "enabled": true,
+    "remote": "origin",
+    "branch": "main",
+    "github_username": "divyprj",
+    "repo_name": "dhh-pulse",
+    "visibility": "private"
+  },
+  "qa_feedback": [],
+  "escalate_to": "Pratyush"
+}

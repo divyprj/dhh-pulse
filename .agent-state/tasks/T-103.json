@@ -1,0 +1,80 @@
+{
+  "task_id": "T-103",
+  "title": "UI & Leaderboard Dashboard: Next.js App Router, Anti-AI-Slop Dark Mode",
+  "description": "Implement the full Next.js 15 App Router dashboard with Tailwind CSS v4 dark mode. Build the artist leaderboard, top gainer tracks view, artist detail page with trajectory charts, and responsive shell layout. STRICTLY enforce the Frontend Craft Triad: no AI slop, DHH street aesthetic, data-dense Operate mode, 60fps GPU-only animations, spring physics tactile states.",
+  "assigned_agent": "OpenCode DeepSeek V4.1 Flash Free",
+  "provider_instance": "opencode",
+  "model": "opencode/deepseek-v4.1-flash-free",
+  "status": "COMPLETED",
+  "attempt_count": 1,
+  "max_attempts": 2,
+  "dependencies": [
+    "T-101",
+    "T-102"
+  ],
+  "scope": {
+    "write_scope": [
+      "tailwind.config.ts",
+      "src/app/layout.tsx",
+      "src/app/page.tsx",
+      "src/app/globals.css",
+      "src/app/artists/page.tsx",
+      "src/app/artists/[id]/page.tsx",
+      "src/app/tracks/page.tsx",
+      "src/app/api/scrape/route.ts",
+      "src/app/api/artists/route.ts",
+      "src/components/ui/index.ts",
+      "src/components/ui/Skeleton.tsx",
+      "src/components/ui/EmptyState.tsx",
+      "src/components/ui/ErrorBoundary.tsx",
+      "src/components/leaderboard/ArtistTable.tsx",
+      "src/components/leaderboard/TrackTable.tsx",
+      "src/components/leaderboard/DeltaBadge.tsx",
+      "src/components/charts/TrajectoryChart.tsx",
+      "src/components/charts/DailyStreamChart.tsx",
+      "src/components/layout/Navbar.tsx",
+      "src/components/layout/Sidebar.tsx",
+      "src/components/layout/Shell.tsx"
+    ],
+    "read_only_scope": [
+      "src/types/contracts.ts",
+      "src/lib/analytics/delta.ts",
+      "src/lib/analytics/aggregator.ts",
+      "src/lib/analytics/leaderboard.ts",
+      "src/lib/db/client.ts",
+      "AGENTS.md",
+      "PROJECT_BRIEF.md"
+    ]
+  },
+  "acceptance_criteria": [
+    "ANTI-SLOP MANDATORY: No centered hero headlines, no 3-column feature cards, no purple/blue gradient blobs, no generic SaaS template patterns",
+    "Dark mode ONLY: High-contrast monochromatic dark palette with amber/industrial accents. Stream numbers lead visual hierarchy.",
+    "tailwind.config.ts extends theme with custom dark palette, Inter + JetBrains Mono fonts, and custom spacing scale",
+    "src/app/layout.tsx sets dark mode, loads fonts, wraps in Shell component",
+    "src/app/page.tsx is the dashboard home \u2014 shows scene-wide summary stats, top 5 artists by daily streams, top 5 gainer tracks",
+    "src/app/artists/page.tsx renders full ArtistTable leaderboard with sortable columns (daily streams, monthly listeners, delta, followers)",
+    "src/app/artists/[id]/page.tsx renders ArtistDetailView with trajectory charts, catalog table, and delta badges",
+    "src/app/tracks/page.tsx renders TrackTable with top gainer tracks across the scene",
+    "All UI states implemented: Default, Loading (skeleton shimmer), Active, Empty (meaningful empty states), Error (ErrorBoundary with retry)",
+    "Components survive stress-test: 1-char artist name 'R' and 100-char unbroken track title without overflow/clipping",
+    "All interactive elements have minimum 44x44px touch targets",
+    "Motion: ONLY transform + opacity animations. scale(0.95)+opacity:0 entry. active:scale-[0.97] press feedback on buttons/cards",
+    "Mobile-native: 100dvh, @media(hover:hover) for hover states, responsive breakpoints",
+    "DeltaBadge: green for positive, red for negative, neutral for zero, with arrow indicators",
+    "Charts use Recharts with dark theme colors matching the palette",
+    "Component props match contracts.ts interfaces exactly (ArtistTableProps, TrackTableProps, DeltaBadgeProps, TrajectoryChartProps, DailyStreamChartProps)"
+  ],
+  "verification": {
+    "cmd": "cd /home/divyansh-prajapati/Downloads/DHH-Pulse-Team && npx tsc --noEmit && npx next build",
+    "passed": true,
+    "exit_code": 0,
+    "verified_at": "2026-11-23T21:37:30+05:30"
+  },
+  "craft_directives": {
+    "taste_skill": "MANDATORY \u2014 zero tolerance for generic AI output patterns",
+    "impeccable_mode": "Operate \u2014 data-dense, scanable, analyst-first",
+    "motion_physics": "Emil Kowalski \u2014 60fps GPU composite, spring physics, tactile feedback"
+  },
+  "qa_feedback": [],
+  "escalate_to": "Pratyush"
+}
