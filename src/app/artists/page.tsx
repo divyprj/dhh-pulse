@@ -154,7 +154,7 @@ export default function ArtistsPage() {
             <button
               type="button"
               onClick={() => setFilter("")}
-              className="tactile -mr-1 grid h-11 w-9 shrink-0 place-items-center text-dim hover:text-chalk"
+              className="tactile -mr-1 grid h-11 w-11 shrink-0 place-items-center text-dim hover:text-chalk"
               aria-label="Clear filter"
             >
               <span aria-hidden="true" className="font-mono text-[11px]">
