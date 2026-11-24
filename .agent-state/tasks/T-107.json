@@ -5,8 +5,8 @@
   "assigned_agent": "Rudraksh",
   "provider_instance": "Rudraksh",
   "model": "gemini-3.8-flash",
-  "status": "QUEUED",
-  "attempt_count": 0,
+  "status": "COMPLETED",
+  "attempt_count": 1,
   "max_attempts": 2,
   "scope": {
     "write_scope": [".agent-state/tasks/T-107.json"],
