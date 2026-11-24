@@ -24,13 +24,13 @@ Prior to this audit, while the source codebase demonstrated high craft, contract
 During this audit turn, all deficiencies were surgically resolved:
 - Authored a comprehensive, production-grade root [`README.md`](../README.md) with Mermaid architecture diagrams, badges, and quickstart commands.
 - Created [`.env.example`](../.env.example) documenting all environment flags.
-- Copied workflow to [`.github/workflows/daily-scrape.yml`](../.github/workflows/daily-scrape.yml) to enable GitHub Actions automation.
-- Authored 5 dedicated technical documentation manuals in `docs/`:
-  - [`docs/API.md`](API.md) — HTTP API reference with request/response schemas and curl examples.
-  - [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) — End-to-end system design and sequence diagrams.
-  - [`docs/DATABASE.md`](DATABASE.md) — SQLite schema, ERD, data dictionary, and index rationale.
-  - [`docs/SCRAPER.md`](SCRAPER.md) — Spotify Pathfinder GraphQL, guest token minting, and rate limiting.
-  - [`docs/FRONTEND.md`](FRONTEND.md) — Frontend Craft Triad, design tokens, and 60fps motion physics.
+- Documented workflow activation for [`workflows/daily-scrape.yml`](../workflows/daily-scrape.yml).
+- Authored dedicated technical documentation manuals in `docs/`:
+  - [`docs/architecture/api-reference.md`](architecture/api-reference.md) — HTTP API reference with request/response schemas and curl examples.
+  - [`docs/architecture/architecture.md`](architecture/architecture.md) — End-to-end system design and sequence diagrams.
+  - [`docs/architecture/database-design.md`](architecture/database-design.md) — SQLite schema, ERD, data dictionary, and index rationale.
+  - [`docs/architecture/system-design.md`](architecture/system-design.md) — Spotify Pathfinder GraphQL, guest token minting, and rate limiting.
+  - [`docs/design/design.md`](design/design.md) — Frontend Craft Triad, design tokens, and 60fps motion physics.
 - Synchronized task states in `.agent-state/tasks/T-106.json` and `T-107.json` to `COMPLETED`.
 
 ---

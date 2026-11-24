@@ -11,7 +11,7 @@
 
 As the independent Principal QA & Security Auditor for the DHH Pulse multi-agent development team, I have conducted a comprehensive, exhaustive audit covering tasks **T-101 (Backend Core & Scraper)**, **T-102 (Analytics Engine & Delta Calculator)**, **T-103 (UI & Next.js 15 App Router Dashboard)**, and **T-104 (Visual Multimodal Inspection)**.
 
-Every implementation was audited against the binding governance rules in [AGENTS.md](file:///home/divyansh-prajapati/Downloads/DHH-Pulse-Team/AGENTS.md), the domain contracts in [contracts.ts](file:///home/divyansh-prajapati/Downloads/DHH-Pulse-Team/src/types/contracts.ts), and the operational requirements in [PROJECT_BRIEF.md](file:///home/divyansh-prajapati/Downloads/DHH-Pulse-Team/PROJECT_BRIEF.md).
+Every implementation was audited against the binding governance rules in [AGENTS.md](../../AGENTS.md), the domain contracts in [contracts.ts](../../src/types/contracts.ts), and the operational requirements in [PROJECT_BRIEF.md](../../PROJECT_BRIEF.md).
 
 All criteria have been completely satisfied with zero security vulnerabilities, zero compile or type errors, and full compliance with the Frontend Craft Triad.
 
