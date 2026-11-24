@@ -5,8 +5,8 @@
   "assigned_agent": "OpenCode Nemotron 3.5 Super VL Free",
   "provider_instance": "opencode",
   "model": "opencode/nemotron-3.5-super-vl-free",
-  "status": "QUEUED",
-  "attempt_count": 0,
+  "status": "COMPLETED",
+  "attempt_count": 1,
   "max_attempts": 2,
   "dependencies": ["T-103"],
   "scope": {
@@ -36,7 +36,7 @@
   ],
   "verification": {
     "cmd": "test -f /home/divyansh-prajapati/Downloads/DHH-Pulse-Team/.agent-state/tasks/T-104-report.md && echo 'REPORT_EXISTS'",
-    "passed": false
+    "passed": true
   },
   "qa_feedback": [],
   "escalate_to": "Pratyush"
