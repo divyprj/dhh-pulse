@@ -1,0 +1,45 @@
+{
+  "task_id": "T-106",
+  "title": "Fix: Write Vitest unit tests for analytics engine (delta, leaderboard, contracts)",
+  "description": "Pre-flight CI gate FAILED: `npm test` exits code 1 because no test files exist matching vitest.config.ts patterns (src/**/*.test.ts | tests/**/*.test.ts). Write comprehensive unit tests for the analytics engine without hitting SQLite — use in-memory mocking/vi.mock. Tests must cover: (1) negative delta clamping to 0, (2) missing previous snapshot returns 0 delta, (3) leaderboard sort orders, (4) top gainer tracks ranking, (5) branded type constructors. Use vitest globals (describe/it/expect/vi) — no imports needed as globals:true is set.",
+  "assigned_agent": "OpenCode Beam Free",
+  "provider_instance": "opencode",
+  "model": "opencode/beam-free",
+  "status": "QUEUED",
+  "attempt_count": 0,
+  "max_attempts": 2,
+  "dependencies": ["T-101", "T-102"],
+  "scope": {
+    "write_scope": [
+      "src/lib/analytics/delta.test.ts",
+      "src/lib/analytics/leaderboard.test.ts",
+      "src/lib/analytics/aggregator.test.ts"
+    ],
+    "read_only_scope": [
+      "src/types/contracts.ts",
+      "src/lib/analytics/delta.ts",
+      "src/lib/analytics/aggregator.ts",
+      "src/lib/analytics/leaderboard.ts",
+      "src/lib/db/client.ts",
+      "vitest.config.ts",
+      "AGENTS.md"
+    ]
+  },
+  "acceptance_criteria": [
+    "npm test exits with code 0 (vitest run finds and passes all test files)",
+    "delta.test.ts: test negative clamp -> Math.max(0, negative) = 0",
+    "delta.test.ts: test missing previous snapshot -> dailyStreams = 0, previousPlaycount = currentPlaycount",
+    "leaderboard.test.ts: test sort by totalDailyStreams desc ordering",
+    "leaderboard.test.ts: test pagination with offset/limit",
+    "aggregator.test.ts: test artist aggregate sums track deltas correctly",
+    "All DB calls are mocked via vi.mock('@/lib/db/client')",
+    "No imports of vitest globals needed (globals:true in config)",
+    "TypeScript strict mode compatible — no type errors"
+  ],
+  "verification": {
+    "cmd": "cd /home/divyansh-prajapati/Downloads/DHH-Pulse-Team && npm test 2>&1; echo \"EXIT:$?\"",
+    "passed": false
+  },
+  "qa_feedback": [],
+  "escalate_to": "Pratyush"
+}

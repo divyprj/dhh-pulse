@@ -1,0 +1,38 @@
+{
+  "task_id": "T-107",
+  "title": "QA Gate: Audit T-106 test files + git push to origin/team",
+  "description": "Independent quality gate for T-106. Audit new test files for correctness, then commit and push.",
+  "assigned_agent": "Rudraksh",
+  "provider_instance": "Rudraksh",
+  "model": "gemini-3.8-flash",
+  "status": "QUEUED",
+  "attempt_count": 0,
+  "max_attempts": 2,
+  "scope": {
+    "write_scope": [".agent-state/tasks/T-107.json"],
+    "read_only_scope": [
+      "src/lib/analytics/delta.test.ts",
+      "src/lib/analytics/aggregator.test.ts",
+      "src/lib/analytics/leaderboard.test.ts",
+      "src/lib/analytics/delta.ts",
+      "src/lib/analytics/aggregator.ts",
+      "src/lib/analytics/leaderboard.ts",
+      "src/types/contracts.ts"
+    ]
+  },
+  "acceptance_criteria": [
+    "npm test exits 0 — 48 tests passing across 3 files",
+    "tsc --noEmit exits 0",
+    "No test file uses real SQLite DB (all use vi.mock('@/lib/db/client'))",
+    "Critical clamping test present: dailyStreams clamped to 0 for negative deltas",
+    "On APPROVED: git add -A && git commit -m 'test(analytics): 48 vitest unit tests — delta, aggregator, leaderboard' && git push origin main:team"
+  ],
+  "verification": {
+    "cmd": "cd /home/divyansh-prajapati/Downloads/DHH-Pulse-Team && npx tsc --noEmit && npm test",
+    "passed": true,
+    "verified_at": "2026-11-24T10:38:59+05:30",
+    "exit_code": 0
+  },
+  "qa_feedback": [],
+  "escalate_to": null
+}
