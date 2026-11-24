@@ -144,20 +144,40 @@ export async function fetchArtistDiscography(
   });
 }
 
+export interface ArtistTrackFetchOptions {
+  /**
+   * Restrict track fetching to releases with these album names.
+   *
+   * Used by quick syncs so a fast pass refreshes the tracks already stored in
+   * the database instead of discovering the whole discography. Without this a
+   * quick run would emit no track snapshots at all and the leaderboard would
+   * report zero daily streams for that date.
+   */
+  readonly onlyAlbumNames?: ReadonlySet<string>;
+}
+
 /**
  * Fetches all tracks across an artist's entire discography.
  * Deduplicates tracks (same trackId) across albums (e.g., appears on multiple compilations).
  *
  * @param spotifyId  Spotify artist ID
  * @param delayMs    Delay between album requests (polite scraping)
+ * @param options    Optional restriction to already-known releases
  */
 export async function fetchAllArtistTracks(
   spotifyId: SpotifyArtistId,
-  delayMs = 1500
+  delayMs = 1500,
+  options: ArtistTrackFetchOptions = {}
 ): Promise<ScrapedTrackData[]> {
-  const albums = await fetchArtistDiscography(spotifyId);
+  const discovered = await fetchArtistDiscography(spotifyId);
+  const albums = options.onlyAlbumNames
+    ? discovered.filter((album) => options.onlyAlbumNames!.has(album.albumName))
+    : discovered;
   console.log(
-    `[catalog] Artist ${spotifyId}: found ${albums.length} releases.`
+    `[catalog] Artist ${spotifyId}: found ${discovered.length} releases` +
+      (options.onlyAlbumNames
+        ? `, refreshing ${albums.length} known.`
+        : ".")
   );
 
   const allTracks: ScrapedTrackData[] = [];
@@ -223,7 +243,7 @@ async function fetchDiscographyPage(
     persistedQuery: {
       version: 1,
       sha256Hash:
-        "b2f27e522e8f4d9c2e3a0f2b79e3e2f68b1b1c3f7a0e9f4e2a7d1b8c5e3f4a1b",
+        "5e07d323febb57b4a56a42abbf781490e58764aa45feb6e3dc0591564fc56599",
     },
   };
 

@@ -14,6 +14,7 @@ import type {
   ArtistScrapeResult,
   BatchScrapeResult,
   ScraperConfig,
+  SpotifyArtistId,
 } from "@/types/contracts";
 import { DEFAULT_SCRAPER_CONFIG, toSnapshotDate } from "@/types/contracts";
 import { getDb } from "@/lib/db/client";
@@ -195,6 +196,23 @@ async function scrapeArtistWithRetry(
         artist.spotifyId,
         config.baseDelayMs / 2
       );
+    } else {
+      // Quick pass: refresh only releases already stored for this artist so the
+      // new snapshot date still carries track playcounts (and therefore daily
+      // stream deltas) instead of going empty.
+      const knownAlbumNames = getKnownAlbumNames(artist.spotifyId);
+      if (knownAlbumNames.size === 0) {
+        console.warn(
+          `[orchestrator] Quick sync for ${artist.name}: no stored releases yet — ` +
+            "run a full sync to seed the catalog."
+        );
+      } else {
+        tracks = await fetchAllArtistTracks(
+          artist.spotifyId,
+          config.baseDelayMs / 2,
+          { onlyAlbumNames: knownAlbumNames }
+        );
+      }
     }
 
     return {
@@ -243,6 +261,20 @@ async function scrapeArtistWithRetry(
 // ---------------------------------------------------------------------------
 // SQLite persistence helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Returns the distinct album names already stored for an artist.
+ * Used to scope quick syncs to known releases.
+ */
+function getKnownAlbumNames(spotifyId: SpotifyArtistId): Set<string> {
+  const rows = getDb()
+    .prepare(
+      `SELECT DISTINCT album_name FROM track_snapshots WHERE spotify_artist_id = ?`
+    )
+    .all(spotifyId) as Array<{ album_name: string }>;
+
+  return new Set(rows.map((row) => row.album_name));
+}
 
 function persistArtistSnapshot(
   db: ReturnType<typeof getDb>,

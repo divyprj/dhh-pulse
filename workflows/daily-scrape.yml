@@ -17,6 +17,15 @@ on:
         type: string
         required: false
 
+# Required so the "Commit database snapshot" step can push.
+permissions:
+  contents: write
+
+# Never run two scrapes at once — they would fight over the SQLite file.
+concurrency:
+  group: dhh-pulse-scrape
+  cancel-in-progress: false
+
 jobs:
   scrape:
     name: Scrape DHH Artist Data
@@ -58,14 +67,19 @@ jobs:
             dhh-sqlite-${{ runner.os }}-
 
       # -----------------------------------------------------------------------
-      # 5. Run the scraper
+      # 5. Ensure the data directory exists
+      # -----------------------------------------------------------------------
+      - name: Ensure data directory
+        run: mkdir -p data
+
+      # -----------------------------------------------------------------------
+      # 6. Run the scraper
       # -----------------------------------------------------------------------
       - name: Run DHH Pulse scraper
         run: |
+          ARGS=""
           if [ "${{ github.event.inputs.quick }}" = "true" ]; then
             ARGS="--quick"
-          else
-            ARGS=""
           fi
 
           if [ -n "${{ github.event.inputs.artist_id }}" ]; then
@@ -78,7 +92,7 @@ jobs:
           NODE_ENV: production
 
       # -----------------------------------------------------------------------
-      # 6. Upload SQLite database as artifact (30-day retention)
+      # 7. Upload SQLite database as artifact (30-day retention)
       # -----------------------------------------------------------------------
       - name: Upload SQLite database artifact
         uses: actions/upload-artifact@v4
@@ -87,32 +101,40 @@ jobs:
           name: dhh-pulse-db-${{ github.run_id }}
           path: data/dhh-pulse.sqlite
           retention-days: 30
+          if-no-files-found: warn
 
       # -----------------------------------------------------------------------
-      # 7. Commit updated database back to repo (optional — if using repo storage)
+      # 8. Commit updated database back to repo
       # -----------------------------------------------------------------------
-      # NOTE: This step commits the SQLite file back to the repository.
-      # This is a valid free-tier approach for <100MB databases.
-      # Disable this step and rely on the cache + artifact if the DB grows large.
+      # NOTE: `data/*.sqlite` is git-ignored so local runs never dirty the tree.
+      # The workflow force-adds it, which is a valid free-tier approach for a
+      # small (<100MB) database. Delete this step if the DB grows large and rely
+      # on the cache + artifact instead.
       - name: Commit database snapshot
         run: |
           git config --global user.name "DHH Pulse Bot"
           git config --global user.email "bot@dhh-pulse.local"
 
-          # Only commit if the database changed
-          if git diff --quiet data/dhh-pulse.sqlite 2>/dev/null; then
+          if [ ! -f data/dhh-pulse.sqlite ]; then
+            echo "No database file — skipping commit."
+            exit 0
+          fi
+
+          # Force-add because data/*.sqlite is git-ignored.
+          git add -f data/dhh-pulse.sqlite
+
+          if git diff --cached --quiet -- data/dhh-pulse.sqlite; then
             echo "No database changes — skipping commit."
           else
-            git add data/dhh-pulse.sqlite
             git commit -m "data: daily snapshot $(date -u +%Y-%m-%d) [skip ci]"
             git push
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true  # Don't fail the workflow if push fails
+        continue-on-error: true  # Don't fail the workflow if push is blocked
 
       # -----------------------------------------------------------------------
-      # 8. Summary
+      # 9. Summary
       # -----------------------------------------------------------------------
       - name: Scrape summary
         if: always()

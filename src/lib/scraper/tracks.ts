@@ -5,7 +5,7 @@
  * The official Spotify Web API does NOT expose playcounts; this scraper uses the
  * same internal endpoint used by the Spotify web player.
  *
- * GraphQL operation: getTrack (by album with tracks)
+ * GraphQL operation: getAlbum (album tracks with playcounts)
  */
 
 import type {
@@ -82,6 +82,34 @@ const ALBUM_TRACKS_QUERY = `
 `;
 
 // Raw shapes
+interface AlbumTrackItem {
+  uid?: string;
+  track?: {
+    /** Often null in the current Pathfinder response — fall back to `uri`. */
+    id?: string | null;
+    uri?: string;
+    name?: string;
+    discNumber?: number;
+    trackNumber?: number;
+    duration?: { totalMilliseconds?: number };
+    contentRating?: { label?: string };
+    playcount?: string; // Spotify returns playcount as string
+    artists?: {
+      items?: Array<{
+        id?: string | null;
+        uri?: string;
+        profile?: { name?: string };
+      }>;
+    };
+    albumOfTrack?: { id?: string; name?: string };
+  };
+}
+
+interface AlbumTrackConnection {
+  totalCount?: number;
+  items?: AlbumTrackItem[];
+}
+
 interface AlbumTracksResponse {
   data?: {
     albumUnion?: {
@@ -89,29 +117,10 @@ interface AlbumTracksResponse {
       uri?: string;
       name?: string;
       date?: { isoString?: string };
-      tracks?: {
-        totalCount?: number;
-        items?: Array<{
-          uid?: string;
-          track?: {
-            id?: string;
-            uri?: string;
-            name?: string;
-            discNumber?: number;
-            trackNumber?: number;
-            duration?: { totalMilliseconds?: number };
-            contentRating?: { label?: string };
-            playcount?: string; // Spotify returns playcount as string
-            artists?: {
-              items?: Array<{
-                id?: string;
-                profile?: { name?: string };
-              }>;
-            };
-            albumOfTrack?: { id?: string; name?: string };
-          };
-        }>;
-      };
+      /** Current Pathfinder shape. */
+      tracksV2?: AlbumTrackConnection;
+      /** Legacy shape, kept as a fallback. */
+      tracks?: AlbumTrackConnection;
     };
   };
   errors?: Array<{ message: string }>;
@@ -182,7 +191,7 @@ async function fetchAlbumTrackPage(
     persistedQuery: {
       version: 1,
       sha256Hash:
-        "469874edcad37b7a379d4f22f0083a49ea3d6ae097916120d9efa04abb1dd21e",
+        "0b6ce3511e1b02e4a40fa95440f992acbe85080eb308af9194322d708fc1914f",
     },
   };
 
@@ -271,21 +280,29 @@ async function fetchAlbumTrackPage(
       return { tracks: [], totalCount: 0 };
     }
 
-    const totalCount = album.tracks?.totalCount ?? 0;
-    const items = album.tracks?.items ?? [];
+    // Pathfinder now returns `tracksV2`; older responses used `tracks`.
+    const connection = album.tracksV2 ?? album.tracks;
+    const totalCount = connection?.totalCount ?? 0;
+    const items = connection?.items ?? [];
 
     const tracks: ScrapedTrackData[] = items
-      .filter((item) => item.track?.id)
-      .map((item) => {
-        const t = item.track!;
+      .map((item): ScrapedTrackData | null => {
+        const t = item.track;
+        if (!t) return null;
+
+        // `id` is frequently null in the current response — derive it from `uri`.
+        const trackId = t.id || idFromUri(t.uri);
+        if (!trackId) return null;
+
         const artistItems = t.artists?.items ?? [];
+        const artistIds = artistItems
+          .map((a) => a.id || idFromUri(a.uri))
+          .filter((id): id is string => Boolean(id));
 
         return {
-          trackId: toSpotifyTrackId(t.id ?? ""),
+          trackId: toSpotifyTrackId(trackId),
           name: t.name ?? "Unknown Track",
-          artistIds: artistItems
-            .filter((a) => a.id)
-            .map((a) => toSpotifyArtistId(a.id!)),
+          artistIds: artistIds.map((id) => toSpotifyArtistId(id)),
           artistNames: artistItems
             .filter((a) => a.profile?.name)
             .map((a) => a.profile!.name!),
@@ -298,8 +315,9 @@ async function fetchAlbumTrackPage(
           releaseDate: releaseDate,
           isExplicit:
             t.contentRating?.label?.toUpperCase() === "EXPLICIT",
-        } satisfies ScrapedTrackData;
-      });
+        };
+      })
+      .filter((track): track is ScrapedTrackData => track !== null);
 
     return { tracks, totalCount };
   } catch (err) {
@@ -323,6 +341,13 @@ async function fetchAlbumTrackPage(
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** Extracts the base62 id from a Spotify URI such as `spotify:track:abc`. */
+function idFromUri(uri?: string): string {
+  if (!uri) return "";
+  const parts = uri.split(":");
+  return parts[parts.length - 1] ?? "";
+}
 
 function buildHeaders(accessToken: string): Record<string, string> {
   return {

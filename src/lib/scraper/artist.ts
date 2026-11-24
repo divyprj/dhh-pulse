@@ -86,9 +86,14 @@ interface ArtistOverviewResponse {
         avatarImage?: {
           sources?: Array<{ url: string; width: number; height: number }>;
         };
-        headerImage?: {
-          sources?: Array<{ url: string; width: number; height: number }>;
+      };
+      headerImage?: {
+        data?: {
+          sources?: Array<{ url: string; maxWidth?: number; maxHeight?: number }>;
         };
+      };
+      onPlatformReputationTrait?: {
+        verification?: { isVerified?: boolean };
       };
       stats?: {
         followers?: number;
@@ -127,7 +132,7 @@ export async function fetchArtistData(
     persistedQuery: {
       version: 1,
       sha256Hash:
-        "591ed473fa2f5426186f8ba52dee295fe1ce32b36820d67eae045df4f9c4c4d3",
+        "eafb1620d783ece118e72fbfede2b0064483e029d3c1aafafa1c2de0e25a89e7",
     },
   };
 
@@ -201,14 +206,14 @@ export async function fetchArtistData(
     // Pick the largest avatar image URL
     const avatarSources = artist.visuals?.avatarImage?.sources ?? [];
     const avatarUrl =
-      avatarSources.sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]?.url ??
-      null;
+      [...avatarSources].sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]
+        ?.url ?? null;
 
-    // Pick the largest header image URL
-    const headerSources = artist.visuals?.headerImage?.sources ?? [];
+    // Pick the largest header image URL (new Pathfinder shape: headerImage.data.sources)
+    const headerSources = artist.headerImage?.data?.sources ?? [];
     const headerUrl =
-      headerSources.sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]?.url ??
-      null;
+      [...headerSources].sort((a, b) => (b.maxWidth ?? 0) - (a.maxWidth ?? 0))[0]
+        ?.url ?? null;
 
     const topCities = (artist.stats?.topCities?.items ?? []).map((c) => ({
       city: c.city,
@@ -223,7 +228,10 @@ export async function fetchArtistData(
       followers: artist.stats?.followers ?? 0,
       imageUrl: avatarUrl,
       headerImageUrl: headerUrl,
-      verified: artist.profile?.verified ?? false,
+      verified:
+        artist.profile?.verified ??
+        artist.onPlatformReputationTrait?.verification?.isVerified ??
+        false,
       topCities,
     };
   } catch (err) {

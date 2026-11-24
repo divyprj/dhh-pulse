@@ -207,9 +207,10 @@
 
   /* ---- Focus & press ------------------------------------------------- */
 
-  /* Table row height: enforces 44px minimum touch target height */
+  /* Table row height: enforces 44px minimum touch target height.
+     `height` (not `min-height`) is required — table rows ignore min-height. */
   .h-row {
-    min-height: 44px;
+    height: 44px;
   }
 
   .tactile {
