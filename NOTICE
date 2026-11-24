@@ -1,0 +1,24 @@
+# Third-Party Notices and Disclaimers
+
+## 1. Trademark Disclaimer
+
+Spotify is a registered trademark of Spotify AB. 
+
+DHH Pulse is an independent software application developed for research, analytics, and community tracking within the Desi Hip Hop music scene. DHH Pulse is not affiliated with, endorsed by, sponsored by, or associated with Spotify AB or any of its subsidiaries.
+
+All artist names, track titles, album names, and cover art referenced or displayed within the application are the property of their respective copyright and trademark owners.
+
+## 2. Open-Source Dependencies
+
+This project incorporates dependencies distributed under permissive open-source licenses:
+
+- **Next.js**: Copyright (c) Vercel, Inc. Distributed under the MIT License.
+- **React**: Copyright (c) Meta Platforms, Inc. Distributed under the MIT License.
+- **better-sqlite3**: Copyright (c) Joshua Wise. Distributed under the MIT License.
+- **Tailwind CSS**: Copyright (c) Tailwind Labs, Inc. Distributed under the MIT License.
+- **TypeScript**: Copyright (c) Microsoft Corporation. Distributed under the Apache License 2.0.
+- **Vitest**: Copyright (c) 2021-Present Anthony Fu, Matias Capeletto. Distributed under the MIT License.
+- **Recharts**: Copyright (c) 2015-2024 Recharts Group. Distributed under the MIT License.
+- **Lucide Icons**: Copyright (c) Lucide Project. Distributed under the ISC License.
+
+Copies of the relevant upstream licenses are included in the respective dependency packages within `node_modules`.
